@@ -46,6 +46,12 @@
 		</dependency>
 
 		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-dataformat-starter</artifactId>
+			<version>3.5.0</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-http</artifactId>
 			<version>3.5.0</version>
