@@ -9,6 +9,7 @@ import lombok.SneakyThrows;
 import org.apache.camel.Exchange;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -19,9 +20,13 @@ import java.time.LocalDateTime;
 @Component
 public class OpenWeatherStrategy implements WeatherStrategy {
 
-    @Autowired
-    ObjectMapper objectMapper;
+    private static final String REST_URL = "api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=%s";
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Value("${camel.weather.token}")
+    private String token;
 
     @SneakyThrows
     @Override
@@ -32,15 +37,18 @@ public class OpenWeatherStrategy implements WeatherStrategy {
 
         MessageA messageA = (MessageA) oldExchange.getIn().getBody();
         MessageB messageB = new MessageB(messageA.getMsg(), LocalDateTime.now().format(RestConfig.dateTimeFormatter), body.getMain().getTemp().intValue());
-        newExchange.getOut().setBody(messageB);
+        newExchange.getIn().setBody(messageB);
+
         return newExchange;
     }
 
     @Override
-    public String getUrl(String longitude, String latitude, String... params) {
-        String paramString = String.join("&", params);
-
-        return String.format("api.openweathermap.org/data/2.5/weather"
-                + "?lat=%s&lon=$%s%s", longitude, latitude, paramString.isEmpty() ? "" : "&" + paramString);
+    public void process(Exchange exchange) throws Exception {
+        MessageA messageA = (MessageA) exchange.getIn().getBody();
+        exchange.getIn().setHeader("url", String.format(REST_URL,
+                messageA.getCoordinates().getLatitude(),
+                messageA.getCoordinates().getLongitude(),
+                token
+        ));
     }
 }

@@ -1,11 +1,15 @@
 package camel.adapter.web;
 
 import camel.adapter.domain.MessageA;
-import org.apache.camel.AggregationStrategy;
+import camel.adapter.strategy.WeatherStrategy;
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.dataformat.JsonLibrary;
 import org.apache.camel.model.rest.RestBindingMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.time.format.DateTimeFormatter;
 
@@ -14,30 +18,54 @@ public class RestConfig extends RouteBuilder {
 
     public static final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
     @Autowired
-    private AggregationStrategy weatherStrategy;
+    private WeatherStrategy weatherStrategy;
 
     @Override
     public void configure() throws Exception {
 
         restConfiguration()
-                .port("8080")
+                .port("{{camel.port}}")
                 .contextPath("camel")
                 .component("servlet")
                 .bindingMode(RestBindingMode.json);
 
-        rest("/message")
+        rest("/message").id("message")
                 .post()
                 .consumes("application/json")
                 .type(MessageA.class)
                 .bindingMode(RestBindingMode.json)
-                .to("direct:processMessage");
+                .to("direct:filter");
 
-        from("direct:processMessage")
+        from("direct:filter").id("filter")
+                .choice()
+                .when(ex -> {
+                        MessageA messageA = (MessageA) ex.getIn().getBody();
+                        return StringUtils.isEmpty(messageA.getMsg());
+                    })
+                .to("direct:handleEmpty")
+                .otherwise()
+                .to("direct:process")
+                .endChoice();
+
+        from("direct:handleEmpty")
+                .process(ex -> {
+                    ex.getOut().setBody("msg should not be empty");
+                    ex.getOut().setHeader(Exchange.HTTP_RESPONSE_CODE, HttpStatus.UNPROCESSABLE_ENTITY.value());
+                });
+
+        from("direct:process").id("process")
+                .process(weatherStrategy).id("addUrl")
                 .enrich()
-                .simple("http:api.openweathermap.org/data/2.5/weather"
-                + "?lat=${body.coordinates.latitude}&lon=${body.coordinates.longitude}&appid=b14a0dc6571020d2723b5c4fa468b8ad"
-                + "&bridgeEndpoint=true&httpMethod=get")
-                .aggregationStrategy(weatherStrategy)
-                .log("${body}");
+                .simple("http:${headers.url}" +
+                        "&bridgeEndpoint=true&httpMethod=get")
+                .aggregationStrategy(weatherStrategy).id("getWeather")
+                .to("direct:producer");
+
+        from("direct:producer").id("producer")
+                .log("sending to {{camel.endpoint.messageB}} body=${body}")
+                .marshal().json(JsonLibrary.Jackson)
+                .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
+                .to("http:{{camel.endpoint.messageB}}?bridgeEndpoint=true&httpMethod=post").id("end")
+                .transform().constant("Done!");
     }
 }
