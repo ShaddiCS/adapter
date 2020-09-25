@@ -9,6 +9,7 @@ import org.apache.camel.builder.AdviceWithRouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.spring.CamelSpringBootRunner;
 import org.apache.camel.test.spring.UseAdviceWith;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,13 +30,14 @@ import java.util.Objects;
 import static camel.adapter.web.TestData.getMessageA;
 import static camel.adapter.web.TestData.getMessageB;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.annotation.DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.*;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @RunWith(CamelSpringBootRunner.class)
 @UseAdviceWith
-@DirtiesContext()
+@DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
 class RestConfigTest {
     private static final String SERVICE_B_URI = "/rest/messageB";
     @Autowired
@@ -54,10 +56,8 @@ class RestConfigTest {
     @EndpointInject("mock:end")
     private MockEndpoint endMock;
 
-    @PostConstruct
-    public void postConstruct() throws Exception {
-        mockServer = MockRestServiceServer.createServer(temp);
-
+    @BeforeEach
+    void beforeEach() throws Exception{
         AdviceWithRouteBuilder.adviceWith(context, "process", ex -> ex.weaveById("getWeather").replace().process(ch -> {
             MessageB mockB = getMessageB(ch.getIn().getBody(MessageA.class));
             ch.getIn().setBody(mockB);
@@ -71,6 +71,11 @@ class RestConfigTest {
                     .body(body);
             temp.exchange(requestEntity, String.class);
         }));
+    }
+
+    @PostConstruct
+    public void postConstruct() {
+        mockServer = MockRestServiceServer.createServer(temp);
     }
 
     @Test
