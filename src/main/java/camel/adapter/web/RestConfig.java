@@ -24,7 +24,7 @@ public class RestConfig extends RouteBuilder {
     public void configure() throws Exception {
 
         restConfiguration()
-                .port("{{camel.port}}")
+                .port("{{server.port}}")
                 .contextPath("camel")
                 .component("servlet")
                 .bindingMode(RestBindingMode.json);

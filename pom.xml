@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>camel</groupId>
 	<artifactId>adapter</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0</version>
 	<name>adapter</name>
 	<description>Spring Boot + Apache Camel Test Task</description>
 
@@ -93,6 +93,7 @@
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
+		<finalName>adapter</finalName>
 	</build>
 
 </project>
