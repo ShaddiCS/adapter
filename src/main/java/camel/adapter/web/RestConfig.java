@@ -62,10 +62,10 @@ public class RestConfig extends RouteBuilder {
                 .to("direct:producer");
 
         from("direct:producer").id("producer")
-                .log("sending to {{camel.endpoint.messageB}} body=${body}")
+                .log("sending to {{camel.endpoint.target}} body=${body}")
                 .marshal().json(JsonLibrary.Jackson)
                 .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
-                .to("http:{{camel.endpoint.messageB}}?bridgeEndpoint=true&httpMethod=post").id("end")
+                .to("http:{{camel.endpoint.target}}?bridgeEndpoint=true&httpMethod=post").id("end")
                 .transform().constant("Done!");
     }
 }
