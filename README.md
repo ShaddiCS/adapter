@@ -24,7 +24,7 @@ $ java -Dfile.encoding=UTF8 -Dspring.profiles.active=open_weather -jar target/ad
 ```
 
 ##### Для настройки приложения создайте файл application.properties в корневой папке проекта.
-####Доступные настройки:
+#### Доступные настройки:
 * #### camel.endpoint.target
 *http endpoint сервиса который будет получать итоговые сообщения.*<br>
 
