@@ -11,7 +11,7 @@ public class TestData {
 
     public static MessageB getMessageB(MessageA messageA) {
         return new MessageB(messageA.getMsg(),
-                MOCK_DATE.format(RestConfig.dateTimeFormatter),
+                MOCK_DATE.format(WeatherRoute.dateTimeFormatter),
                 270);
     }
 

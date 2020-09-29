@@ -4,6 +4,7 @@ import camel.adapter.domain.MessageA;
 import camel.adapter.domain.MessageB;
 import camel.adapter.domain.OpenWeatherMapObject;
 import camel.adapter.web.RestConfig;
+import camel.adapter.web.WeatherRoute;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.apache.camel.Exchange;
@@ -36,7 +37,7 @@ public class OpenWeatherStrategy implements WeatherStrategy {
         OpenWeatherMapObject body = (OpenWeatherMapObject) dataFormat.unmarshal(newExchange, newExchange.getIn().getBody(InputStream.class));
 
         MessageA messageA = (MessageA) oldExchange.getIn().getBody();
-        MessageB messageB = new MessageB(messageA.getMsg(), LocalDateTime.now().format(RestConfig.dateTimeFormatter), body.getMain().getTemp().intValue());
+        MessageB messageB = new MessageB(messageA.getMsg(), LocalDateTime.now().format(WeatherRoute.dateTimeFormatter), body.getMain().getTemp().intValue());
         newExchange.getIn().setBody(messageB);
 
         return newExchange;
