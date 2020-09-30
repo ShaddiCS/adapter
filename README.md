@@ -42,6 +42,9 @@ curl --location --request POST 'http://localhost:8080/camel/message' \
 }
 ```
 
+Ожидаемый ответ, при пустом поле "msg": HttpStatus=422 "msg should not be empty"
+Запросы с lng отличным от RU игнорируются
+
 ##### Для настройки приложения создайте файл application.properties в корневой папке проекта.
 ### Доступные настройки:
 * #### camel.endpoint.target
