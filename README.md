@@ -23,6 +23,25 @@ $ mvn clean package
 $ java -Dfile.encoding=UTF8 -Dspring.profiles.active=open_weather -jar target/adapter.jar
 ```
 
+### Пример использования
+
+Запрос на main endpoint
+```
+curl --location --request POST 'http://localhost:8080/camel/message' \
+--header 'Content-Type: application/json' \
+--data-raw '{"msg" : "Привет", "lng": "RU", "coordinates": {"latitude": 52.3, "longitude": 53.3}}'
+```
+Ожидаемый ответ: "Done!"
+
+После обработки реквеста ожидаемый запрос на сервис Б:
+```
+{
+  "txt": "Привет",
+  "createdDt": "2020-09-30T10:49:36Z",
+  "currentTemp": 270
+}
+```
+
 ##### Для настройки приложения создайте файл application.properties в корневой папке проекта.
 ### Доступные настройки:
 * #### camel.endpoint.target
