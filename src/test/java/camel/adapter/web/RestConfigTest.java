@@ -59,7 +59,7 @@ class RestConfigTest {
 
     @BeforeEach
     void beforeEach() throws Exception{
-        AdviceWithRouteBuilder.adviceWith(context, "producer", ex -> ex.weaveById("end").replace().to("mock:end").process(exchange -> {
+        AdviceWithRouteBuilder.adviceWith(context, "sender", ex -> ex.weaveById("end").replace().to("mock:end").process(exchange -> {
             String body = exchange.getIn().getBody(String.class);
             RequestEntity<String> requestEntity = RequestEntity
                     .post(new URI(SERVICE_B_URI))

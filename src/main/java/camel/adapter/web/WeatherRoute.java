@@ -38,9 +38,9 @@ public class WeatherRoute extends RouteBuilder {
                 .simple("http:${headers.url}" +
                         "&bridgeEndpoint=true&httpMethod=get")
                 .aggregationStrategy(weatherStrategy).id("getWeather")
-                .to("direct:producer");
+                .to("direct:sender");
 
-        from("direct:producer").routeId("producer")
+        from("direct:sender").routeId("sender")
                 .log("sending to {{camel.endpoint.target}} body=${body}")
                 .marshal().json(JsonLibrary.Jackson)
                 .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
