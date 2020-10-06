@@ -1,7 +1,7 @@
-#### Микросервис адаптер
+## Сервис адаптер
 ##### Принимает сообщение из сервиса А, модифицирует его и отправляет новое сообщение в сервис Б.
 
-### [Тестовое задание](spring-camel-task.pdf)
+### [Бизнес требования](spring-camel-task.pdf)
 
 ### Установка
 ```
@@ -23,8 +23,30 @@ $ mvn clean package
 $ java -Dfile.encoding=UTF8 -Dspring.profiles.active=open_weather -jar target/adapter.jar
 ```
 
-##### Для настройки приложения создайте файл application.properties в корневой папке проекта.
-####Доступные настройки:
+## Пример использования
+
+ * Запрос на main endpoint
+```
+curl --location --request POST 'http://localhost:8080/camel/message' \
+--header 'Content-Type: application/json' \
+--data-raw '{"msg" : "Привет", "lng": "RU", "coordinates": {"latitude": 52.3, "longitude": 53.3}}'
+```
+Ожидаемый ответ: "Done!"
+
+После обработки реквеста ожидаемый запрос на сервис Б:
+```
+{
+  "txt": "Привет",
+  "createdDt": "2020-09-30T10:49:36Z",
+  "currentTemp": 270
+}
+```
+
+ * Ожидаемый ответ, при пустом поле "msg": HttpStatus=422 "msg should not be empty"
+ * Запросы с lng отличным от RU игнорируются
+
+### Для настройки приложения создайте файл application.properties в корневой папке проекта.
+## Доступные настройки:
 * #### camel.endpoint.target
 *http endpoint сервиса который будет получать итоговые сообщения.*<br>
 
