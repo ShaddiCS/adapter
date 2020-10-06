@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class MessageB {
     private String txt;
-    private String dateTime;
+    private String createdDt;
     private Integer currentTemp;
 }
