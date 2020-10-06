@@ -3,7 +3,6 @@ package camel.adapter.strategy;
 import camel.adapter.domain.MessageA;
 import camel.adapter.domain.MessageB;
 import camel.adapter.domain.OpenWeatherMapObject;
-import camel.adapter.web.RestConfig;
 import camel.adapter.web.WeatherRoute;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;

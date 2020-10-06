@@ -1,15 +1,13 @@
 package camel.adapter.web;
 
-import camel.adapter.domain.MessageA;
 import camel.adapter.strategy.WeatherStrategy;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
+import java.net.UnknownHostException;
 import java.time.format.DateTimeFormatter;
 
 @Component
@@ -21,24 +19,20 @@ public class WeatherRoute extends RouteBuilder {
 
     @Override
     public void configure() throws Exception {
-        from("direct:filter").id("filter")
+        onException(UnknownHostException.class)
+                .handled(true)
+                .to("direct:service_down");
+
+        from("direct:filter").routeId("filter")
+                .filter(simple("${body.lng} == 'RU'"))
                 .choice()
-                .when(ex -> {
-                    MessageA messageA = (MessageA) ex.getIn().getBody();
-                    return StringUtils.isEmpty(messageA.getMsg());
-                })
+                .when(simple("${body.msg} == ''"))
                 .to("direct:handleEmpty")
                 .otherwise()
                 .to("direct:process")
                 .endChoice();
 
-        from("direct:handleEmpty")
-                .process(ex -> {
-                    ex.getOut().setBody("msg should not be empty");
-                    ex.getOut().setHeader(Exchange.HTTP_RESPONSE_CODE, HttpStatus.UNPROCESSABLE_ENTITY.value());
-                });
-
-        from("direct:process").id("process")
+        from("direct:process").routeId("process")
                 .process(weatherStrategy).id("addUrl")
                 .enrich()
                 .simple("http:${headers.url}" +
@@ -46,11 +40,11 @@ public class WeatherRoute extends RouteBuilder {
                 .aggregationStrategy(weatherStrategy).id("getWeather")
                 .to("direct:producer");
 
-        from("direct:producer").id("producer")
+        from("direct:producer").routeId("producer")
                 .log("sending to {{camel.endpoint.target}} body=${body}")
                 .marshal().json(JsonLibrary.Jackson)
                 .setHeader(Exchange.CONTENT_TYPE, constant("application/json"))
                 .to("http:{{camel.endpoint.target}}?bridgeEndpoint=true&httpMethod=post").id("end")
-                .transform().constant("Done!");
+                .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(200));
     }
 }
