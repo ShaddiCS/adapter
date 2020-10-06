@@ -1,5 +1,6 @@
 package camel.adapter.web;
 
+import camel.adapter.domain.Language;
 import camel.adapter.domain.MessageA;
 import camel.adapter.domain.MessageB;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +26,7 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.net.URI;
-import java.util.Objects;
+import java.net.UnknownHostException;
 
 import static camel.adapter.web.TestData.getMessageA;
 import static camel.adapter.web.TestData.getMessageB;
@@ -58,11 +59,6 @@ class RestConfigTest {
 
     @BeforeEach
     void beforeEach() throws Exception{
-        AdviceWithRouteBuilder.adviceWith(context, "process", ex -> ex.weaveById("getWeather").replace().process(ch -> {
-            MessageB mockB = getMessageB(ch.getIn().getBody(MessageA.class));
-            ch.getIn().setBody(mockB);
-        }).to("mock:process"));
-
         AdviceWithRouteBuilder.adviceWith(context, "producer", ex -> ex.weaveById("end").replace().to("mock:end").process(exchange -> {
             String body = exchange.getIn().getBody(String.class);
             RequestEntity<String> requestEntity = RequestEntity
@@ -79,7 +75,7 @@ class RestConfigTest {
     }
 
     @Test
-    void configure() throws Exception {
+    void testOk() throws Exception {
         MessageA messageA = getMessageA();
         MessageB messageB = getMessageB(messageA);
         String messageBString = objectMapper.writeValueAsString(messageB);
@@ -90,6 +86,11 @@ class RestConfigTest {
         endMock.expectedMessageCount(1);
         endMock.expectedBodiesReceived(messageBString);
 
+        AdviceWithRouteBuilder.adviceWith(context, "process", ex -> ex.weaveById("getWeather").replace().process(ch -> {
+            MessageB mockB = getMessageB(ch.getIn().getBody(MessageA.class));
+            ch.getIn().setBody(mockB);
+        }).to("mock:process"));
+
         mockServer.expect(ExpectedCount.once(),
                 requestTo(new URI(SERVICE_B_URI)))
                 .andExpect(method(HttpMethod.POST))
@@ -99,11 +100,48 @@ class RestConfigTest {
 
         ResponseEntity<String> response = restTemplate.postForEntity("/camel/message", messageA, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        String s = Objects.requireNonNull(response.getBody());
-        assertThat(s.equals("Done!"));
 
         endMock.assertIsSatisfied();
         processMock.assertIsSatisfied();
+    }
+
+    @Test
+    void testServiceDown() throws Exception {
+        MessageA messageA = getMessageA();
+
+        processMock.expectedMessageCount(0);
+        endMock.expectedMessageCount(0);
+
+        mockServer.expect(ExpectedCount.never(),
+                requestTo(new URI(SERVICE_B_URI)));
+
+        AdviceWithRouteBuilder.adviceWith(context, "process", ex -> ex.weaveById("getWeather").replace().process(ch -> {
+            throw new UnknownHostException();
+        }).to("mock:process"));
+
+        ResponseEntity<String> response = restTemplate.postForEntity("/camel/message", messageA, String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.REQUEST_TIMEOUT);
+
+        processMock.assertIsSatisfied();
+        endMock.assertIsSatisfied();
+    }
+
+    @Test
+    void testWrongLng() throws Exception {
+        MessageA messageA = getMessageA();
+        messageA.setLng(Language.EN);
+
+        processMock.expectedMessageCount(0);
+        endMock.expectedMessageCount(0);
+
+        mockServer.expect(ExpectedCount.never(),
+                requestTo(new URI(SERVICE_B_URI)));
+
+        ResponseEntity<String> response = restTemplate.postForEntity("/camel/message", messageA, String.class);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+
+        processMock.assertIsSatisfied();
+        endMock.assertIsSatisfied();
     }
 
     @Test
@@ -119,8 +157,6 @@ class RestConfigTest {
 
         ResponseEntity<String> response = restTemplate.postForEntity("/camel/message", messageA, String.class);
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY);
-        String s = Objects.requireNonNull(response.getBody());
-        assertThat(s.equals("msg should not be empty"));
 
         processMock.assertIsSatisfied();
         endMock.assertIsSatisfied();
