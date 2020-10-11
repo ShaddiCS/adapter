@@ -31,7 +31,7 @@ curl --location --request POST 'http://localhost:8080/camel/message' \
 --header 'Content-Type: application/json' \
 --data-raw '{"msg" : "Привет", "lng": "RU", "coordinates": {"latitude": 52.3, "longitude": 53.3}}'
 ```
-Ожидаемый ответ: "Done!"
+HttpStatus: 200
 
 После обработки реквеста ожидаемый запрос на сервис Б:
 ```
@@ -42,8 +42,9 @@ curl --location --request POST 'http://localhost:8080/camel/message' \
 }
 ```
 
- * Ожидаемый ответ, при пустом поле "msg": HttpStatus=422 "msg should not be empty"
- * Запросы с lng отличным от RU игнорируются
+ * При пустом поле "msg", HttpStatus: 422
+ * Запросы с lng отличным от RU игнорируются, HttpStatus: 204
+ * Сервис погоды не отвечает, HttpStatus: 408
 
 ### Для настройки приложения создайте файл application.properties в корневой папке проекта.
 ## Доступные настройки:
