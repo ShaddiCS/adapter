@@ -19,8 +19,8 @@ $ java -Dfile.encoding=UTF8 -jar target/adapter.jar
 ```
 для запуска с профилем
 ```
-$ mvn clean package
-$ java -Dfile.encoding=UTF8 -Dspring.profiles.active=open_weather -jar target/adapter.jar
+$ gradlew clean build
+$ java -Dfile.encoding=UTF8 -Dspring.profiles.active=open_weather -jar build/libs/adapter-1.0.jar
 ```
 
 ## Пример использования
