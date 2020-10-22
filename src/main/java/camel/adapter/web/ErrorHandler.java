@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ErrorHandler extends RouteBuilder {
     @Override
-    public void configure() throws Exception {
+    public void configure() {
         from("direct:service_down")
                 .transform().constant("")
                 .setHeader(Exchange.HTTP_RESPONSE_CODE, constant(HttpStatus.REQUEST_TIMEOUT.value()));

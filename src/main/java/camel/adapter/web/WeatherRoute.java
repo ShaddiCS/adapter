@@ -18,7 +18,7 @@ public class WeatherRoute extends RouteBuilder {
     private WeatherStrategy weatherStrategy;
 
     @Override
-    public void configure() throws Exception {
+    public void configure() {
         onException(UnknownHostException.class)
                 .handled(true)
                 .to("direct:service_down");

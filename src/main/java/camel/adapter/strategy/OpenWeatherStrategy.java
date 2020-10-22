@@ -43,7 +43,7 @@ public class OpenWeatherStrategy implements WeatherStrategy {
     }
 
     @Override
-    public void process(Exchange exchange) throws Exception {
+    public void process(Exchange exchange) {
         MessageA messageA = (MessageA) exchange.getIn().getBody();
         exchange.getIn().setHeader("url", String.format(REST_URL,
                 messageA.getCoordinates().getLatitude(),

@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class RestConfig extends RouteBuilder {
 
     @Override
-    public void configure() throws Exception {
+    public void configure() {
 
         restConfiguration()
                 .port("{{server.port}}")
