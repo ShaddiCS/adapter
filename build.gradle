@@ -5,26 +5,29 @@
 plugins {
     id 'java'
     id 'maven-publish'
+    id 'org.springframework.boot' version '2.3.3.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.10.RELEASE'
+    id "io.freefair.lombok" version "5.2.1"
 }
 
 repositories {
     mavenLocal()
+    mavenCentral()
     maven {
-        url = 'http://repo.maven.apache.org/maven2'
+        url = 'https://repo.maven.apache.org/maven2/'
     }
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web:2.3.3.RELEASE'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.apache.camel.springboot:camel-servlet-starter:3.5.0'
     implementation 'org.apache.camel.springboot:camel-jackson-starter:3.5.0'
     implementation 'org.apache.camel.springboot:camel-spring-boot-starter:3.5.0'
     implementation 'org.apache.camel.springboot:camel-dataformat-starter:3.5.0'
     implementation 'org.apache.camel:camel-http:3.5.0'
-    implementation 'org.projectlombok:lombok:1.18.12'
     implementation 'ch.qos.logback:logback-classic:1.2.3'
     testImplementation 'org.apache.camel:camel-test-spring:3.5.0'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test:2.3.3.RELEASE'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 group = 'camel'
@@ -39,7 +42,9 @@ publishing {
         }
     }
 }
-
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
+}
+test {
+    useJUnitPlatform()
 }

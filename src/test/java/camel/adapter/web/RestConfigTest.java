@@ -8,10 +8,9 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.EndpointInject;
 import org.apache.camel.builder.AdviceWithRouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
-import org.apache.camel.test.spring.CamelSpringBootRunner;
 import org.apache.camel.test.spring.UseAdviceWith;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +19,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.client.ExpectedCount;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
@@ -36,10 +36,10 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@RunWith(CamelSpringBootRunner.class)
+@RunWith(SpringRunner.class)
 @UseAdviceWith
 @DirtiesContext(classMode = BEFORE_EACH_TEST_METHOD)
-class RestConfigTest {
+public class RestConfigTest {
     private static final String SERVICE_B_URI = "/rest/messageB";
     @Autowired
     private ObjectMapper objectMapper;
@@ -57,8 +57,8 @@ class RestConfigTest {
     @EndpointInject("mock:end")
     private MockEndpoint endMock;
 
-    @BeforeEach
-    void beforeEach() throws Exception{
+    @Before
+    public void beforeEach() throws Exception{
         AdviceWithRouteBuilder.adviceWith(context, "sender", ex -> ex.weaveById("end").replace().to("mock:end").process(exchange -> {
             String body = exchange.getIn().getBody(String.class);
             RequestEntity<String> requestEntity = RequestEntity
@@ -75,7 +75,7 @@ class RestConfigTest {
     }
 
     @Test
-    void testOk() throws Exception {
+    public void testOk() throws Exception {
         MessageA messageA = getMessageA();
         MessageB messageB = getMessageB(messageA);
         String messageBString = objectMapper.writeValueAsString(messageB);
@@ -106,7 +106,7 @@ class RestConfigTest {
     }
 
     @Test
-    void testServiceDown() throws Exception {
+    public void testServiceDown() throws Exception {
         MessageA messageA = getMessageA();
 
         processMock.expectedMessageCount(0);
@@ -127,7 +127,7 @@ class RestConfigTest {
     }
 
     @Test
-    void testWrongLng() throws Exception {
+    public void testWrongLng() throws Exception {
         MessageA messageA = getMessageA();
         messageA.setLng(Language.EN);
 
@@ -145,7 +145,7 @@ class RestConfigTest {
     }
 
     @Test
-    void testEmptyMessage() throws Exception {
+    public void testEmptyMessage() throws Exception {
         MessageA messageA = getMessageA();
         messageA.setMsg("");
 
