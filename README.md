@@ -14,8 +14,8 @@ $ gradlew bootRun
 ```
 или
 ```
-$ mvn clean package
-$ java -Dfile.encoding=UTF8 -jar target/adapter.jar
+$ gradlew clean build
+$ java -Dfile.encoding=UTF8 -jar build/libs/adapter-1.0.jar
 ```
 для запуска с профилем
 ```
