@@ -10,17 +10,17 @@ git clone https://github.com/ShaddiCS/adapter
 
 ### Запуск (из папки проекта)
 ```
-$ mvn spring-boot:run
+$ gradlew bootRun
 ```
 или
 ```
-$ mvn clean package
-$ java -Dfile.encoding=UTF8 -jar target/adapter.jar
+$ gradlew clean build
+$ java -Dfile.encoding=UTF8 -jar build/libs/adapter-1.0.jar
 ```
 для запуска с профилем
 ```
-$ mvn clean package
-$ java -Dfile.encoding=UTF8 -Dspring.profiles.active=open_weather -jar target/adapter.jar
+$ gradlew clean build
+$ java -Dfile.encoding=UTF8 -Dspring.profiles.active=open_weather -jar build/libs/adapter-1.0.jar
 ```
 
 ## Пример использования
