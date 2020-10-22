@@ -10,7 +10,7 @@ git clone https://github.com/ShaddiCS/adapter
 
 ### Запуск (из папки проекта)
 ```
-$ mvn spring-boot:run
+$ gradlew bootRun
 ```
 или
 ```
